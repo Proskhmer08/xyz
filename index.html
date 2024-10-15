@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dymages NFT Marketplace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #fff;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #1f1f1f;
+            border-bottom: 2px solid #333;
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px; /* Add this line to create space between title and subtitle */
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #80aaff;
+        }
+
+        .logo-description {
+            font-size: 14px;
+            color: #bbb;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background-color: #444;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 80px); /* Adjust based on header height */
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #1f1f1f;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-nav {
+            list-style-type: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .sidebar-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #333;
+            border: none;
+            border-radius: 5px;
+            color: #80aaff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar-button:hover {
+            background-color: #444;
+        }
+
+        main {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .collection-card {
+            aspect-ratio: 1 / 1; /* This ensures a square shape */
+            background-color: #1f1f1f;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-start;
+            padding: 15px;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .collection-card:hover {
+            transform: scale(1.05);
+        }
+
+        .collection-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%);
+            z-index: 1;
+        }
+
+        .collection-card h3 {
+            font-size: 18px;
+            color: #fff;
+            z-index: 2;
+            margin: 0;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        .nav-button#connectButton {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button#connectButton::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ff4136;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-button#connectButton.connected {
+            background-color: #2ecc40;
+            color: #fff;
+        }
+
+        .nav-button#connectButton.connected::before {
+            background-color: #fff;
+        }
+
+        /* Responsive design adjustments */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            .collection-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        /* Dark/Light mode styles */
+        body.light-mode {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        body.light-mode header {
+            background-color: #e0e0e0;
+        }
+        body.light-mode .sidebar, body.light-mode .collection-card {
+            background-color: #fff;
+        }
+
+        /* Search bar styles */
+        .search-bar {
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .search-bar input {
+            width: 70%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px 0 0 5px;
+        }
+        .search-bar button {
+            padding: 10px 20px;
+            background-color: #80aaff;
+            color: white;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+        }
+
+        /* Footer styles */
+        footer {
+            background-color: #1f1f1f;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Loading indicator */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        /* Tooltip styles */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <div class="logo">Dymages</div>
+            <div class="logo-description">An NFT Marketplace on Dymension</div>
+        </div>
+        <div class="nav-buttons">
+            <button class="nav-button">My Collection</button>
+            <button class="nav-button" id="connectButton">Connect</button>
+            <button class="nav-button" id="themeToggle">🌓</button>
+        </div>
+    </header>
+    <div class="search-bar">
+        <input type="text" placeholder="Search NFTs...">
+        <button>Search</button>
+    </div>
+    <div class="container">
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><button class="sidebar-button">Explore</button></li>
+                <li><button class="sidebar-button">Create</button></li>
+                <li><button class="sidebar-button">Manage Collection</button></li>
+                <li><button class="sidebar-button tooltip">Vote<span class="tooltiptext">Vote on marketplace proposals</span></button></li>
+                <li><button class="sidebar-button tooltip">Earn<span class="tooltiptext">Earn rewards by staking</span></button></li>
+            </ul>
+        </aside>
+        <main>
+            <div class="collection-grid">
+                <!-- Repeat this structure for each NFT collection -->
+                <div class="collection-card" style="background-image: url('https://picsum.photos/400/400?random=1');">
+                    <h3>NFT Collection #1</h3>
+                </div>
+                <div class="collection-card" style="background-image: url('https://picsum.photos/400/400?random=2');">
+                    <h3>NFT Collection #2</h3>
+                </div>
+                <div class="collection-card" style="background-image: url('https://picsum.photos/400/400?random=3');">
+                    <h3>NFT Collection #3</h3>
+                </div>
+                <div class="collection-card" style="background-image: url('https://picsum.photos/400/400?random=4');">
+                    <h3>NFT Collection #4</h3>
+                </div>
+                <div class="collection-card" style="background-image: url('https://picsum.photos/400/400?random=5');">
+                    <h3>NFT Collection #5</h3>
+                </div>
+                <div class="collection-card" style="background-image: url('https://picsum.photos/400/400?random=6');">
+                    <h3>NFT Collection #6</h3>
+                </div>
+                <div class="collection-card" style="background-image: url('https://picsum.photos/400/400?random=7');">
+                    <h3>NFT Collection #7</h3>
+                </div>
+                <div class="collection-card" style="background-image: url('https://picsum.photos/400/400?random=8');">
+                    <h3>NFT Collection #8</h3>
+                </div>
+                <div class="collection-card" style="background-image: url('https://picsum.photos/400/400?random=9');">
+                    <h3>NFT Collection #9</h3>
+                </div>
+                <div class="collection-card" style="background-image: url('https://picsum.photos/400/400?random=10');">
+                    <h3>NFT Collection #10</h3>
+                </div>
+                <div class="collection-card" style="background-image: url('https://picsum.photos/400/400?random=11');">
+                    <h3>NFT Collection #11</h3>
+                </div>
+                <div class="collection-card" style="background-image: url('https://picsum.photos/400/400?random=12');">
+                    <h3>NFT Collection #12</h3>
+                </div>
+            </div>
+        </main>
+    </div>
+    <footer>
+        <p>© 2023 Dymages NFT Marketplace. All rights reserved.</p>
+        <p>
+            <a href="#">Terms of Service</a> | 
+            <a href="#">Privacy Policy</a> | 
+            <a href="#">Contact Us</a>
+        </p>
+    </footer>
+    <div class="loading" id="loadingIndicator">Loading...</div>
+    <script>
+        const connectButton = document.getElementById('connectButton');
+        let isConnected = false;
+
+        async function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    // Request account access - this will prompt the user to connect
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    
+                    if (accounts.length > 0) {
+                        // Check if the network is Ethereum Mainnet
+                        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                        if (chainId !== '0x1') {
+                            try {
+                                await window.ethereum.request({
+                                    method: 'wallet_switchEthereumChain',
+                                    params: [{ chainId: '0x1' }],
+                                });
+                            } catch (switchError) {
+                                alert('Please switch to the Ethereum Mainnet in your Metamask wallet.');
+                                return;
+                            }
+                        }
+                        
+                        // At this point, the user has successfully connected and signed
+                        isConnected = true;
+                        connectButton.textContent = 'Account';
+                        connectButton.classList.add('connected');
+                        
+                        // Format the address for display
+                        const address = accounts[0];
+                        const formattedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+                        
+                        alert(`Connected to wallet!\nAddress: ${formattedAddress}`);
+                    }
+                } catch (error) {
+                    console.error(error);
+                    if (error.code === 4001) {
+                        // EIP-1193 userRejectedRequest error
+                        alert('Please connect to Metamask.');
+                    } else {
+                        alert('Failed to connect to wallet.');
+                    }
+                }
+            } else {
+                alert('Metamask is not installed. Please install Metamask to use this feature.');
+            }
+        }
+
+        function disconnectWallet() {
+            isConnected = false;
+            connectButton.textContent = 'Connect';
+            connectButton.classList.remove('connected');
+            alert('Wallet disconnected.');
+        }
+
+        connectButton.addEventListener('click', () => {
+            if (!isConnected) {
+                connectWallet();
+            } else {
+                const confirmDisconnect = confirm('Do you want to disconnect your wallet?');
+                if (confirmDisconnect) {
+                    disconnectWallet();
+                }
+            }
+        });
+
+        // Make all buttons and collection cards clickable
+        document.querySelectorAll('button:not(#connectButton), .collection-card').forEach(element => {
+            element.addEventListener('click', function() {
+                alert(`Clicked: ${this.textContent.trim()}`);
+            });
+        });
+
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+        });
+
+        // Simulated loading state
+        function showLoading() {
+            document.getElementById('loadingIndicator').style.display = 'block';
+        }
+        function hideLoading() {
+            document.getElementById('loadingIndicator').style.display = 'none';
+        }
+
+        // Simulate loading when clicking on collection cards
+        document.querySelectorAll('.collection-card').forEach(card => {
+            card.addEventListener('click', () => {
+                showLoading();
+                setTimeout(hideLoading, 2000); // Simulate 2 seconds loading
+            });
+        });
+    </script>
+</body>
+</html>
